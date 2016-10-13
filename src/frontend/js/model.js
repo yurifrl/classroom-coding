@@ -1,29 +1,40 @@
-const { compose, replace, prop, map } = require('ramda')
-const { mconcat } = require('pointfree-fantasy')
-const { getJSON } = require('jquery')
-const Task = require('data.task')
+const { compose, replace, append, remove, prop, map, curry } = require('ramda')
+const daggy = require('daggy')
+const {indexOf, Http} = require('./utils')
+const { fold } = require('pointfree-fantasy')
+const { Some, None } = require('fantasy-options')
+
+const Point = Number
 
 const Url = String
 
-const Http = {
-  // get :: Url -> Task Error Json
-  get: (url) => new Task((rej, res) => getJSON(url).error(rej).done(res))
-}
+// mayToOpt :: Maybe a -> Option a
+const mayToOpt = (m) => m.cata({Just: Some, Nothing: () => None})
+
+// Photo { src :: Url, x :: Point, y :: Point }
+const Photo = daggy.tagged('src', 'x', 'y')
+
+// newPhoto :: Url -> Photo
+const newPhoto = (url) => Photo(url, 0,0)
 
 const baseUrl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=14c4ebab40155d8c54dacb0642f46d68&tags={TAGS}&extras=url_s&format=json&jsoncallback=?'
 
 // makeUrl :: String -> Url
 const makeUrl = (t) => replace("{TAGS}", t, baseUrl)
-// Monoid aproach
-// const makeUrl = (t) => {
-//   {start, end} = baseUrl.split("{TAGS}")
-//   return mconcat([start, t, end])
-// }
 
-// extractUrls :: JSON -> [Url]
-const extractUrls = compose(map(prop('url_s')), prop('photo'), prop('photos'))
+// toPhoto :: JSON -> [Photo]
+const toPhoto = compose(map(compose(newPhoto, prop('url_s'))), prop('photo'), prop('photos'))
 
-// flickrSearch :: String -> ?
-const flickrSearch = compose(map(extractUrls), Http.get, makeUrl)
+// flickrSearch :: Term -> Task Error [Photo]
+const flickrSearch = compose(map(toPhoto), Http.get, makeUrl)
 
-module.exports = { flickrSearch }
+// indexOfPhoto :: Photo -> [Photo] -> Maybe Number
+const indexOfPhoto = curry( (p, ps) => indexOf(p.src, ps.map(prop('src'))) )
+
+// replacePhoto :: Photo => [Photo] -> [Photo]
+const replacePhoto = curry((p, ps) => compose(fold(append(p), () => append(p, ps)),
+  mayToOpt,
+  map(i => remove(i, 1, ps)),
+  indexOfPhoto(p))(ps))
+
+module.exports = { flickrSearch, Photo, replacePhoto }
