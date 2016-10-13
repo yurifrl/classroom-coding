@@ -1,4 +1,5 @@
 const React = require('react')
+const Flickr = require('./flickr')
 
 module.exports = React.createClass({
   displayName: 'App',
@@ -12,7 +13,9 @@ module.exports = React.createClass({
   render() {
     return (
       <div id="app">
+        HElllo from this outsinde
         { this.state.error ? <p>{this.state.error}</p> : null }
+        <Flickr showError={this.showError} />
       </div>
     );
   }

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "server": "babel-node src/backend/app.js",
-    "dev": "npm install && webpack-dev-server --devtool eval --progress --colors --content-base public --port 5431 --hot --inline"
+    "dev": "webpack-dev-server --devtool eval --progress --colors --content-base public --port 5431 --hot --inline --watch --watch-polling",
+    "start": "scripts/start"
   },
   "repository": {
     "type": "git"
