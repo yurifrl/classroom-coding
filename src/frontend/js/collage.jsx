@@ -1,23 +1,22 @@
 const React = require('react')
-const { append, map } = require('ramda')
+const DragImage = require('./drag_image')
+const { append } = require('ramda')
+const { preventDefault } = require('./utils')
 const { Photo, replacePhoto } = require('./model')
-const { preventDefault} = require('./utils')
-const { DragImage } = require('./drag_image')
 
 module.exports = React.createClass({
   displayName: 'Collage',
 
-  // getInitialState :: {photos :: [Photo]}
-  getInitialState() { return {photos: [] }},
+  // getInitialState :: { photos :: [Photo] }
+  getInitialState() { return { photos: [] } },
 
-  // updatePhotos :: [Url] -> State Photos
   updatePhotos(xs) { this.setState({photos: xs}) },
 
   onDrop({dataTransfer: dt, clientX: x, clientY: y, currentTarget: t}) {
     const offset = t.getBoundingClientRect().top
     const src = dt.getData('text')
-    const photo = Photo(src, x, y - offset)
-    this.updatePhotos(append(photo, this.state.photos))
+    const photo = Photo(src, x, (y - offset))
+    this.updatePhotos(replacePhoto(photo, this.state.photos))
   },
 
   render() {
@@ -29,4 +28,3 @@ module.exports = React.createClass({
     );
   }
 });
-

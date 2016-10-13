@@ -7,8 +7,6 @@ module.exports = React.createClass({
   onDragStart({dataTransfer: dt, currentTarget: t}) { dt.setData('text', t.src) },
 
   render() {
-    return <img src={p.src} key={p.src} draggable={true} onDragStart={this.onDragStart} {...this.props} />;
+    return <img {...this.props} src={this.props.src} key={this.props.src} draggable={true} onDragStart={this.onDragStart} />
   }
 });
-
-
