@@ -2,8 +2,8 @@ const express = require('express');
 const path = require('path');
 const server = require('./server');
 const bodyParser = require('body-parser');
-const sync = require('./db');
-const Task = require('data.task');
+const {sync} = require('./db');
+const Task = require('data.task')
 
 const app = express();
 
@@ -14,10 +14,10 @@ app.use(bodyParser.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
 
 const main = sync.chain(() => {
-  return new Task((rej, res) =>{
+  return new Task((rej, res) => {
     server(app)
     app.listen(3000, () => res('Express: listening on 3000'))
   })
 })
 
-main.fork(console.log, console.log);
+main.fork(console.log, console.log)
